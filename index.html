@@ -1,926 +1,971 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetroTools Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
-    
+    <title>刀刃文書 — Blade Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
-            --bg-primary: #0a0a1a;
-            --bg-secondary: #0d1b2a;
-            --accent-cyan: #00f5d4;
-            --accent-magenta: #f72585;
-            --accent-blue: #4361ee;
-            --text-primary: #e8f1f2;
-            --text-muted: #7b8cde;
-            --card-bg: rgba(13, 27, 42, 0.85);
-            --border-color: rgba(0, 245, 212, 0.3);
-            --glow-cyan: rgba(0, 245, 212, 0.5);
-            --glow-magenta: rgba(247, 37, 133, 0.5);
+            --bg-deep: #0a0a0c;
+            --bg-card: rgba(18, 12, 12, 0.85);
+            --crimson: #c0392b;
+            --crimson-glow: #e74c3c;
+            --teal: #1abc9c;
+            --teal-dark: #16a085;
+            --gold: #f1c40f;
+            --gold-dim: #d4a10f;
+            --text-main: #f0e6d3;
+            --text-muted: #a89b8c;
+            --border-color: rgba(192, 57, 43, 0.3);
+            --card-border: rgba(241, 196, 15, 0.15);
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Cinzel', 'Noto Serif JP', serif;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
             overflow-x: hidden;
-            min-height: 100vh;
-        }
-        
-        .font-display {
-            font-family: 'Orbitron', sans-serif;
-        }
-        
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        
-        .content-wrapper {
             position: relative;
-            z-index: 10;
-            min-height: 100vh;
         }
-        
-        /* Retro Grid */
-        .retro-grid {
+
+        /* === BACKGROUND LAYERS === */
+        .bg-layer {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-            background: 
-                linear-gradient(90deg, rgba(0, 245, 212, 0.1) 1px, transparent 1px),
-                linear-gradient(rgba(0, 245, 212, 0.1) 1px, transparent 1px);
-            background-size: 60px 60px;
-            transform: perspective(500px) rotateX(60deg);
-            transform-origin: bottom;
-            animation: gridMove 20s linear infinite;
-            opacity: 0.6;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-gradient {
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(192, 57, 43, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(26, 188, 156, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse 90% 70% at 50% 50%, rgba(10, 10, 12, 1) 0%, var(--bg-deep) 100%);
+        }
+
+        .bg-pattern {
+            background-image:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(192, 57, 43, 0.03) 40px,
+                    rgba(192, 57, 43, 0.03) 41px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(192, 57, 43, 0.03) 40px,
+                    rgba(192, 57, 43, 0.03) 41px
+                );
+            animation: patternShift 30s linear infinite;
+        }
+
+        @keyframes patternShift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(41px, 41px); }
+        }
+
+        /* Floating kanji */
+        .kanji-float {
+            position: fixed;
+            font-family: 'Noto Serif JP', serif;
+            font-weight: 900;
+            color: rgba(192, 57, 43, 0.04);
+            pointer-events: none;
+            z-index: 0;
+            animation: kanjiDrift 25s ease-in-out infinite;
+        }
+
+        @keyframes kanjiDrift {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.04; }
+            50% { transform: translateY(-30px) rotate(5deg); opacity: 0.07; }
+        }
+
+        /* Particle canvas */
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
             z-index: 1;
             pointer-events: none;
         }
-        
-        @keyframes gridMove {
-            0% { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-        
-        /* Glowing orbs background */
-        .orb {
+
+        /* === LANGUAGE SWITCHER === */
+        .lang-switcher {
             position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.4;
-            animation: orbFloat 8s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--accent-cyan);
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-        
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: var(--accent-magenta);
-            bottom: -150px;
-            right: -150px;
-            animation-delay: -4s;
-        }
-        
-        .orb-3 {
-            width: 300px;
-            height: 300px;
-            background: var(--accent-blue);
-            top: 50%;
-            left: 50%;
-            animation-delay: -2s;
-        }
-        
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -30px) scale(1.1); }
-            50% { transform: translate(-20px, 20px) scale(0.95); }
-            75% { transform: translate(20px, 30px) scale(1.05); }
-        }
-        
-        /* Glass card */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 6px;
+            background: rgba(10, 8, 8, 0.9);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            box-shadow: 
-                0 0 30px rgba(0, 245, 212, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 6px;
         }
-        
-        /* Buttons */
-        .retro-btn {
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .lang-btn:hover {
+            color: var(--gold);
+            border-color: var(--card-border);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--crimson), #8e2218);
+            color: #fff;
+            border-color: var(--crimson-glow);
+            box-shadow: 0 0 20px rgba(192, 57, 43, 0.4);
+        }
+
+        /* === MAIN CONTENT === */
+        .main-wrapper {
             position: relative;
-            display: inline-flex;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px 32px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--bg-primary);
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            min-width: 280px;
+            padding: 40px 20px;
         }
-        
-        .retro-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .retro-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 
-                0 10px 40px var(--glow-cyan),
-                0 0 20px var(--glow-cyan);
-        }
-        
-        .retro-btn:hover::before {
-            left: 100%;
-        }
-        
-        .retro-btn:active {
-            transform: translateY(-1px) scale(0.98);
-        }
-        
-        .retro-btn.secondary {
-            background: transparent;
-            border: 2px solid var(--accent-magenta);
-            color: var(--accent-magenta);
-        }
-        
-        .retro-btn.secondary:hover {
-            background: var(--accent-magenta);
-            color: var(--bg-primary);
-            box-shadow: 0 10px 40px var(--glow-magenta);
-        }
-        
-        /* Language selector */
-        .lang-selector {
-            position: relative;
-        }
-        
-        .lang-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .lang-btn:hover {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 20px var(--glow-cyan);
-        }
-        
-        .lang-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            min-width: 160px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
-        
-        .lang-dropdown.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        .lang-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid rgba(0, 245, 212, 0.1);
-        }
-        
-        .lang-option:last-child {
-            border-bottom: none;
-        }
-        
-        .lang-option:hover {
-            background: rgba(0, 245, 212, 0.1);
-        }
-        
-        .lang-option.active {
-            background: rgba(0, 245, 212, 0.2);
-            color: var(--accent-cyan);
-        }
-        
-        /* Clock styles */
-        .clock-card {
+
+        /* === HEADER === */
+        .hero-section {
             text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.9), rgba(67, 97, 238, 0.2));
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
         }
-        
-        .clock-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 245, 212, 0.2);
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .clock-time {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+
+        .hero-kanji {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(48px, 10vw, 100px);
             font-weight: 900;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            background: linear-gradient(135deg, var(--crimson-glow), var(--gold), var(--crimson));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(192, 57, 43, 0.3));
+            letter-spacing: 8px;
         }
-        
-        .clock-label {
-            font-size: 12px;
+
+        .hero-subtitle {
+            font-size: clamp(14px, 2.5vw, 20px);
             color: var(--text-muted);
+            letter-spacing: 6px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 8px;
+            margin-bottom: 12px;
         }
-        
-        /* Location display */
-        .location-display {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 24px;
-            background: linear-gradient(135deg, rgba(247, 37, 133, 0.1), rgba(67, 97, 238, 0.1));
-            border: 1px solid rgba(247, 37, 133, 0.3);
-            border-radius: 12px;
+
+        .hero-tagline {
+            font-size: clamp(12px, 2vw, 16px);
+            color: var(--teal);
+            letter-spacing: 3px;
+            opacity: 0.8;
         }
-        
-        .location-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--accent-magenta);
-            border-radius: 50%;
-            animation: pulse 1.5s ease-in-out infinite;
+
+        .divider-blade {
+            width: 200px;
+            height: 2px;
+            margin: 24px auto;
+            background: linear-gradient(90deg, transparent, var(--crimson), var(--gold), var(--crimson), transparent);
+            border-radius: 2px;
+            animation: dividerPulse 3s ease-in-out infinite;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
+
+        @keyframes dividerPulse {
+            0%, 100% { opacity: 0.6; transform: scaleX(1); }
+            50% { opacity: 1; transform: scaleX(1.1); }
         }
-        
-        /* Entrance animations */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease forwards;
+
+        /* === CARDS GRID === */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 28px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 10px;
         }
-        
+
+        .card {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 36px 28px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+        .card:nth-child(4) { animation-delay: 0.8s; }
+
         @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
-        .delay-6 { animation-delay: 0.6s; }
-        .delay-7 { animation-delay: 0.7s; }
-        
-        /* Scanline effect */
-        .scanlines {
-            position: fixed;
+
+        .card::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 0, 0, 0.03) 2px,
-                rgba(0, 0, 0, 0.03) 4px
-            );
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--crimson), var(--gold), var(--teal));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(192, 57, 43, 0.08) 0%, transparent 60%);
             pointer-events: none;
-            z-index: 1000;
-            opacity: 0.5;
+            opacity: 0;
+            transition: opacity 0.4s;
         }
-        
-        /* Title glow */
-        .title-glow {
-            text-shadow: 
-                0 0 10px var(--glow-cyan),
-                0 0 20px var(--glow-cyan),
-                0 0 40px var(--glow-cyan);
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(192, 57, 43, 0.5);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(192, 57, 43, 0.15),
+                inset 0 1px 0 rgba(241, 196, 15, 0.1);
         }
-        
-        /* Button number badge */
-        .btn-number {
-            display: inline-flex;
+
+        .card:hover::before { opacity: 1; }
+        .card:hover::after { opacity: 1; }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
+            font-size: 26px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card:nth-child(1) .card-icon {
+            background: linear-gradient(135deg, rgba(192, 57, 43, 0.2), rgba(192, 57, 43, 0.05));
+            color: var(--crimson-glow);
+            border: 1px solid rgba(192, 57, 43, 0.3);
+        }
+
+        .card:nth-child(2) .card-icon {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(241, 196, 15, 0.05));
+            color: var(--gold);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
+        .card:nth-child(3) .card-icon {
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.2), rgba(26, 188, 156, 0.05));
+            color: var(--teal);
+            border: 1px solid rgba(26, 188, 156, 0.3);
+        }
+
+        .card:nth-child(4) .card-icon {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.05));
+            color: #bb8fce;
+            border: 1px solid rgba(155, 89, 182, 0.3);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 52px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+            z-index: 1;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+            font-family: system-ui, sans-serif;
+        }
+
+        /* Sub-links for card 3 */
+        .sub-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .sub-link-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(26, 188, 156, 0.06);
+            border: 1px solid rgba(26, 188, 156, 0.15);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 13px;
+            font-family: system-ui, sans-serif;
+            transition: all 0.3s;
+        }
+
+        .sub-link-item:hover {
+            background: rgba(26, 188, 156, 0.15);
+            border-color: rgba(26, 188, 156, 0.4);
+            transform: translateX(4px);
+            color: var(--teal);
+        }
+
+        .sub-link-item i {
+            color: var(--teal);
+            font-size: 14px;
+        }
+
+        /* Main CTA button */
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            position: relative;
+            z-index: 2;
+            letter-spacing: 1px;
+            overflow: hidden;
+        }
+
+        .card-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .card-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-crimson {
+            background: linear-gradient(135deg, var(--crimson), #8e2218);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(192, 57, 43, 0.3);
+        }
+
+        .btn-crimson:hover {
+            box-shadow: 0 8px 30px rgba(192, 57, 43, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-dim), #b8860b);
+            color: #1a1a1a;
+            box-shadow: 0 4px 20px rgba(241, 196, 15, 0.2);
+        }
+
+        .btn-gold:hover {
+            box-shadow: 0 8px 30px rgba(241, 196, 15, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-teal {
+            background: linear-gradient(135deg, var(--teal-dark), #0e8c73);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(26, 188, 156, 0.2);
+        }
+
+        .btn-teal:hover {
+            box-shadow: 0 8px 30px rgba(26, 188, 156, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(155, 89, 182, 0.2);
+        }
+
+        .btn-purple:hover {
+            box-shadow: 0 8px 30px rgba(155, 89, 182, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* === FOOTER === */
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 40px 20px 24px;
+            color: var(--text-muted);
             font-size: 12px;
-            margin-right: 12px;
+            font-family: system-ui, sans-serif;
+            letter-spacing: 2px;
         }
-        
-        /* Responsive */
+
+        footer .footer-blade {
+            width: 120px;
+            height: 1px;
+            margin: 0 auto 16px;
+            background: linear-gradient(90deg, transparent, var(--crimson), transparent);
+        }
+
+        /* === BREATHING GLOW EFFECT === */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            animation: orbBreath 6s ease-in-out infinite;
+        }
+
+        .glow-orb.red {
+            width: 300px; height: 300px;
+            background: rgba(192, 57, 43, 0.08);
+            top: 10%; left: 5%;
+        }
+
+        .glow-orb.teal {
+            width: 250px; height: 250px;
+            background: rgba(26, 188, 156, 0.06);
+            bottom: 15%; right: 10%;
+            animation-delay: 3s;
+        }
+
+        .glow-orb.gold {
+            width: 200px; height: 200px;
+            background: rgba(241, 196, 15, 0.04);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 1.5s;
+        }
+
+        @keyframes orbBreath {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* === TOAST === */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(18, 12, 12, 0.95);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-family: system-ui, sans-serif;
+            animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in 2.5s forwards;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast i { color: var(--teal); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
+        /* === RESPONSIVE === */
         @media (max-width: 768px) {
-            .clock-time {
-                font-size: 1.5rem;
+            .cards-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
             }
-            
-            .retro-btn {
-                min-width: 100%;
-                padding: 14px 24px;
-                font-size: 12px;
+
+            .lang-switcher {
+                top: 10px;
+                right: 10px;
+                padding: 4px;
+            }
+
+            .lang-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .hero-kanji {
+                letter-spacing: 4px;
             }
         }
-        
+
+        @media (max-width: 480px) {
+            .card { padding: 28px 20px; }
+        }
+
         /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--crimson); border-radius: 3px; }
     </style>
 </head>
 <body>
-    <!-- Scanlines overlay -->
-    <div class="scanlines"></div>
-    
-    <!-- Background orbs -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    
-    <!-- Retro grid -->
-    <div class="retro-grid"></div>
-    
-    <!-- Three.js canvas -->
-    <div id="canvas-container"></div>
-    
-    <!-- Main content -->
-    <div class="content-wrapper">
-        <!-- Header -->
-        <header class="p-6 flex justify-between items-center relative z-20">
-            <div class="fade-in delay-1">
-                <h1 class="font-display text-2xl font-bold tracking-wider">
-                    <span class="text-[var(--accent-cyan)]">RETRO</span><span class="text-[var(--accent-magenta)]">TOOLS</span>
-                </h1>
-            </div>
-            
-            <!-- Language Selector -->
-            <div class="lang-selector fade-in delay-2">
-                <button class="lang-btn" id="langBtn" aria-label="Select language" aria-expanded="false">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
-                    <span id="currentLang">IND</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 9l6 6 6-6"/>
-                    </svg>
-                </button>
-                <div class="lang-dropdown" id="langDropdown" role="menu">
-                    <div class="lang-option active" data-lang="id" role="menuitem" tabindex="0">
-                        <span>IND</span>
-                        <span class="text-xs text-[var(--text-muted)]">Bahasa Indonesia</span>
-                    </div>
-                    <div class="lang-option" data-lang="en" role="menuitem" tabindex="0">
-                        <span>ENG</span>
-                        <span class="text-xs text-[var(--text-muted)]">English</span>
-                    </div>
-                    <div class="lang-option" data-lang="ja" role="menuitem" tabindex="0">
-                        <span>JPN</span>
-                        <span class="text-xs text-[var(--text-muted)]">日本語</span>
-                    </div>
-                    <div class="lang-option" data-lang="de" role="menuitem" tabindex="0">
-                        <span>DEU</span>
-                        <span class="text-xs text-[var(--text-muted)]">Deutsch</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
+
+    <!-- Background layers -->
+    <div class="bg-layer bg-gradient"></div>
+    <div class="bg-layer bg-pattern"></div>
+    <div class="glow-orb red"></div>
+    <div class="glow-orb teal"></div>
+    <div class="glow-orb gold"></div>
+
+    <!-- Floating kanji decorations -->
+    <div class="kanji-float" style="top:8%; left:5%; font-size:120px;">滅</div>
+    <div class="kanji-float" style="top:25%; right:8%; font-size:90px; animation-delay:5s;">刃</div>
+    <div class="kanji-float" style="bottom:20%; left:10%; font-size:100px; animation-delay:10s;">鬼</div>
+    <div class="kanji-float" style="bottom:35%; right:5%; font-size:80px; animation-delay:15s;">殺</div>
+    <div class="kanji-float" style="top:55%; left:3%; font-size:70px; animation-delay:8s;">隊</div>
+
+    <!-- Particle canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Language Switcher -->
+    <nav class="lang-switcher" role="navigation" aria-label="Language selector">
+        <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+        <button class="lang-btn" data-lang="ja" onclick="switchLang('ja')">JP</button>
+        <button class="lang-btn active" data-lang="id" onclick="switchLang('id')">ID</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
         <!-- Hero Section -->
-        <main class="container mx-auto px-6 py-12">
-            <div class="max-w-4xl mx-auto">
-                <!-- Title -->
-                <div class="text-center mb-16 fade-in delay-2">
-                    <h2 class="font-display text-4xl md:text-6xl font-black mb-4 title-glow" data-translate="heroTitle">
-                        Jalan Pintas Menuju Karir Anda
-                    </h2>
-                    <p class="text-lg md:text-xl text-[var(--text-muted)] max-w-2xl mx-auto" data-translate="heroSubtitle">
-                        Koleksi alat pembantu dokumen profesional untuk kebutuhan karir Anda
-                    </p>
+        <header class="hero-section">
+            <div class="hero-kanji" data-i18n="hero_kanji">刀刃文書</div>
+            <div class="hero-subtitle" data-i18n="hero_subtitle">BLADE DOCS</div>
+            <div class="divider-blade"></div>
+            <div class="hero-tagline" data-i18n="hero_tagline">Dokumen Kerja Bermata Tajam</div>
+        </header>
+
+        <!-- Cards Grid -->
+        <section class="cards-grid" aria-label="Document tools">
+
+            <!-- Card 1: Surat Resign Notice -->
+            <article class="card" onmousemove="trackMouse(event, this)">
+                <div class="card-number">01</div>
+                <div class="card-icon"><i class="fas fa-scroll"></i></div>
+                <h2 class="card-title" data-i18n="card1_title">Surat Resign Notice</h2>
+                <p class="card-desc" data-i18n="card1_desc">Template surat pengunduran diri formal dengan pemberitahuan resmi. Cocok untuk proses resign profesional di perusahaan.</p>
+                <a href="https://ridwansasm.github.io/Surat-resign-Notice/" target="_blank" rel="noopener noreferrer" class="card-btn btn-crimson" data-i18n="card1_btn">
+                    Buka Dokumen <i class="fas fa-arrow-right"></i>
+                </a>
+            </article>
+
+            <!-- Card 2: Template Resign 2 -->
+            <article class="card" onmousemove="trackMouse(event, this)">
+                <div class="card-number">02</div>
+                <div class="card-icon"><i class="fas fa-file-signature"></i></div>
+                <h2 class="card-title" data-i18n="card2_title">Template Resign V2</h2>
+                <p class="card-desc" data-i18n="card2_desc">Desain template pengunduran diri versi kedua yang lebih modern dan elegan. Tampilan baru, kesan sama kuatnya.</p>
+                <a href="https://ridwansasm.github.io/template-Resign-2/" target="_blank" rel="noopener noreferrer" class="card-btn btn-gold" data-i18n="card2_btn">
+                    Buka Dokumen <i class="fas fa-arrow-right"></i>
+                </a>
+            </article>
+
+            <!-- Card 3: Multi-tool (CV, Portofolio, Resign Biasa) -->
+            <article class="card" onmousemove="trackMouse(event, this)">
+                <div class="card-number">03</div>
+                <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+                <h2 class="card-title" data-i18n="card3_title">Alat Multi Dokumen</h2>
+                <p class="card-desc" data-i18n="card3_desc">Tiga alat dalam satu: Builder CV, Portfolio Generator, dan Surat Resign Biasa. Pilih sesuai kebutuhanmu.</p>
+                <div class="sub-links">
+                    <a href="https://ridwansasm.github.io/Builder-CV/" target="_blank" rel="noopener noreferrer" class="sub-link-item">
+                        <i class="fas fa-id-card"></i>
+                        <span data-i18n="card3_link1">Builder CV</span>
+                    </a>
+                    <a href="https://ridwansasm.github.io/Portofolio-Generator/" target="_blank" rel="noopener noreferrer" class="sub-link-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span data-i18n="card3_link2">Portfolio Generator</span>
+                    </a>
+                    <a href="https://ridwansasm.github.io/Surat-resign-biasa/" target="_blank" rel="noopener noreferrer" class="sub-link-item">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <span data-i18n="card3_link3">Surat Resign Biasa</span>
+                    </a>
                 </div>
-                
-                <!-- Clocks Section -->
-                <div class="glass-card p-6 mb-10 fade-in delay-3">
-                    <h3 class="font-display text-sm uppercase tracking-widest text-[var(--accent-cyan)] mb-6" data-translate="worldClock">Waktu Dunia</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="clock-card">
-                            <div class="clock-time" id="clockJakarta">--:--:--</div>
-                            <div class="clock-label">Jakarta (UTC+7)</div>
-                        </div>
-                        <div class="clock-card">
-                            <div class="clock-time" id="clockTokyo">--:--:--</div>
-                            <div class="clock-label">Tokyo (UTC+9)</div>
-                        </div>
-                        <div class="clock-card">
-                            <div class="clock-time" id="clockBerlin">--:--:--</div>
-                            <div class="clock-label">Berlin (UTC+1/2)</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Location Section -->
-                <div class="glass-card p-6 mb-10 fade-in delay-4">
-                    <h3 class="font-display text-sm uppercase tracking-widest text-[var(--accent-magenta)] mb-4" data-translate="yourLocation">Lokasi Anda</h3>
-                    <div class="location-display">
-                        <div class="location-dot"></div>
-                        <div>
-                            <div class="font-semibold" id="locationText" data-translate="detectingLocation">Mendeteksi lokasi...</div>
-                            <div class="text-sm text-[var(--text-muted)]" id="locationCoords">--</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Buttons Section -->
-                <div class="glass-card p-8 fade-in delay-5">
-                    <h3 class="font-display text-sm uppercase tracking-widest text-[var(--text-muted)] mb-8" data-translate="availableTools">Alat Tersedia</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <a href="https://ridwansasm.github.io/Surat-resign-Notice/" target="_blank" class="retro-btn">
-                            <span class="btn-number">01</span>
-                            <span data-translate="btn1">Surat Resign Notice</span>
-                        </a>
-                        <a href="https://ridwansasm.github.io/Builder-CV/" target="_blank" class="retro-btn secondary">
-                            <span class="btn-number">02</span>
-                            <span data-translate="btn2">Builder CV</span>
-                        </a>
-                        <a href="https://ridwansasm.github.io/Portofolio-Generator/" target="_blank" class="retro-btn secondary">
-                            <span class="btn-number">03</span>
-                            <span data-translate="btn3">Portofolio Generator</span>
-                        </a>
-                        <a href="https://ridwansasm.github.io/Surat-resign-biasa/" target="_blank" class="retro-btn">
-                            <span class="btn-number">04</span>
-                            <span data-translate="btn4">Surat Resign Biasa</span>
-                        </a>
-                        <a href="https://ridwansasm.github.io/membuat-surat-lamaran/" target="_blank" class="retro-btn col-span-1 md:col-span-2 md:max-w-[50%] md:mx-auto">
-                            <span class="btn-number">05</span>
-                            <span data-translate="btn5">Surat Lamaran Kerja</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <footer class="text-center mt-16 pb-8 fade-in delay-6">
-                    <p class="text-sm text-[var(--text-muted)]">
-                        <span data-translate="footer">Dibuat dengan teknologi modern untuk produktivitas maksimal</span>
-                    </p>
-                </footer>
-            </div>
-        </main>
-    </div>
-    
-    <!-- Three.js Script -->
-    <script type="module">
-        import * as THREE from 'three';
-        
-        // Initialize scene
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        camera.position.z = 30;
-        
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
-            alpha: true 
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
-        
-        // Floating retro shapes
-        const shapes = [];
-        const geometries = [
-            new THREE.IcosahedronGeometry(1.5, 0),
-            new THREE.OctahedronGeometry(1.5, 0),
-            new THREE.TetrahedronGeometry(1.5, 0),
-            new THREE.TorusGeometry(1, 0.4, 8, 16),
-            new THREE.BoxGeometry(1.8, 1.8, 1.8)
-        ];
-        
-        const colors = [0x00f5d4, 0xf72585, 0x4361ee, 0x7209b7, 0x3a0ca3];
-        
-        for (let i = 0; i < 25; i++) {
-            const geometry = geometries[Math.floor(Math.random() * geometries.length)];
-            const material = new THREE.MeshBasicMaterial({
-                color: colors[Math.floor(Math.random() * colors.length)],
-                wireframe: true,
-                transparent: true,
-                opacity: 0.6
-            });
-            
-            const mesh = new THREE.Mesh(geometry, material);
-            
-            mesh.position.x = (Math.random() - 0.5) * 60;
-            mesh.position.y = (Math.random() - 0.5) * 40;
-            mesh.position.z = (Math.random() - 0.5) * 30;
-            
-            mesh.rotation.x = Math.random() * Math.PI;
-            mesh.rotation.y = Math.random() * Math.PI;
-            
-            mesh.userData = {
-                rotationSpeed: {
-                    x: (Math.random() - 0.5) * 0.02,
-                    y: (Math.random() - 0.5) * 0.02,
-                    z: (Math.random() - 0.5) * 0.02
-                },
-                floatSpeed: Math.random() * 0.5 + 0.2,
-                floatOffset: Math.random() * Math.PI * 2,
-                originalY: mesh.position.y
-            };
-            
-            shapes.push(mesh);
-            scene.add(mesh);
-        }
-        
-        // Particle system
-        const particleCount = 200;
-        const particleGeometry = new THREE.BufferGeometry();
-        const particlePositions = new Float32Array(particleCount * 3);
-        const particleSizes = new Float32Array(particleCount);
-        
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions[i * 3] = (Math.random() - 0.5) * 80;
-            particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 60;
-            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
-            particleSizes[i] = Math.random() * 3 + 1;
-        }
-        
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
-        
-        const particleMaterial = new THREE.PointsMaterial({
-            color: 0x00f5d4,
-            size: 0.15,
-            transparent: true,
-            opacity: 0.8,
-            sizeAttenuation: true
-        });
-        
-        const particles = new THREE.Points(particleGeometry, particleMaterial);
-        scene.add(particles);
-        
-        // Mouse interaction
-        let mouseX = 0;
-        let mouseY = 0;
-        
-        document.addEventListener('mousemove', (event) => {
-            mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
-            mouseY = (event.clientY / window.innerHeight - 0.5) * 2;
-        });
-        
-        // Animation loop
-        let time = 0;
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.01;
-            
-            // Animate shapes
-            shapes.forEach((shape) => {
-                shape.rotation.x += shape.userData.rotationSpeed.x;
-                shape.rotation.y += shape.userData.rotationSpeed.y;
-                shape.rotation.z += shape.userData.rotationSpeed.z;
-                
-                shape.position.y = shape.userData.originalY + 
-                    Math.sin(time * shape.userData.floatSpeed + shape.userData.floatOffset) * 2;
-            });
-            
-            // Animate particles
-            particles.rotation.y += 0.0005;
-            particles.rotation.x += 0.0002;
-            
-            // Camera follows mouse slightly
-            camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
-            camera.position.y += (-mouseY * 5 - camera.position.y) * 0.02;
-            camera.lookAt(scene.position);
-            
-            renderer.render(scene, camera);
-        }
-        
-        animate();
-        
-        // Handle resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-    
-    <!-- Main Script -->
+            </article>
+
+            <!-- Card 4: Surat Lamaran -->
+            <article class="card" onmousemove="trackMouse(event, this)">
+                <div class="card-number">04</div>
+                <div class="card-icon"><i class="fas fa-paper-plane"></i></div>
+                <h2 class="card-title" data-i18n="card4_title">Surat Lamaran Kerja</h2>
+                <p class="card-desc" data-i18n="card4_desc">Buat surat lamaran kerja yang profesional dan meyakinkan. Langsung bisa dipakai untuk melamar pekerjaan impianmu.</p>
+                <a href="https://ridwansasm.github.io/membuat-surat-lamaran/" target="_blank" rel="noopener noreferrer" class="card-btn btn-purple" data-i18n="card4_btn">
+                    Buka Dokumen <i class="fas fa-arrow-right"></i>
+                </a>
+            </article>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-blade"></div>
+        <span data-i18n="footer_text">Ditempa dengan presisi — Blade Docs</span>
+    </footer>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
-        // Translation data
+        // =============================================
+        // TRANSLATIONS DATABASE
+        // =============================================
         const translations = {
-            id: {
-                heroTitle: 'Jalan Pintas Menuju Karir Anda',
-                heroSubtitle: 'Koleksi alat pembantu dokumen profesional untuk kebutuhan karir Anda',
-                worldClock: 'Waktu Dunia',
-                yourLocation: 'Lokasi Anda',
-                detectingLocation: 'Mendeteksi lokasi...',
-                locationDetected: 'Lokasi terdeteksi',
-                locationDenied: 'Akses lokasi ditolak',
-                locationError: 'Tidak dapat menemukan lokasi',
-                availableTools: 'Alat Tersedia',
-                btn1: 'Surat Resign Notice',
-                btn2: 'Builder CV',
-                btn3: 'Portofolio Generator',
-                btn4: 'Surat Resign Biasa',
-                btn5: 'Surat Lamaran Kerja',
-                footer: 'Dibuat dengan teknologi modern untuk produktivitas maksimal',
-                langCode: 'IND'
-            },
             en: {
-                heroTitle: 'Shortcut to Your Career',
-                heroSubtitle: 'Professional document tools collection for your career needs',
-                worldClock: 'World Clock',
-                yourLocation: 'Your Location',
-                detectingLocation: 'Detecting location...',
-                locationDetected: 'Location detected',
-                locationDenied: 'Location access denied',
-                locationError: 'Cannot find location',
-                availableTools: 'Available Tools',
-                btn1: 'Resign Notice Letter',
-                btn2: 'CV Builder',
-                btn3: 'Portfolio Generator',
-                btn4: 'Standard Resign Letter',
-                btn5: 'Job Application Letter',
-                footer: 'Created with modern technology for maximum productivity',
-                langCode: 'ENG'
+                hero_kanji: "Blade Docs",
+                hero_subtitle: "BLADE DOCS",
+                hero_tagline: "Sharp Document Tools for Warriors",
+                card1_title: "Resign Notice Letter",
+                card1_desc: "Formal resignation letter template with official notice. Ideal for a professional resignation process at your company.",
+                card1_btn: "Open Document",
+                card2_title: "Resign Template V2",
+                card2_desc: "A more modern and elegant second version of the resignation template. New look, just as powerful.",
+                card2_btn: "Open Document",
+                card3_title: "Multi Document Tools",
+                card3_desc: "Three tools in one: CV Builder, Portfolio Generator, and Standard Resignation Letter. Choose what you need.",
+                card3_link1: "CV Builder",
+                card3_link2: "Portfolio Generator",
+                card3_link3: "Standard Resign Letter",
+                card4_title: "Job Application Letter",
+                card4_desc: "Create a professional and convincing job application letter. Ready to use for your dream job application.",
+                card4_btn: "Open Document",
+                footer_text: "Forged with precision — Blade Docs",
+                toast_lang: "Language changed to English"
             },
             ja: {
-                heroTitle: 'あなたのキャリアへの近道',
-                heroSubtitle: 'キャリアニーズに対応するプロフェッショナルなドキュメントツール集',
-                worldClock: '世界時計',
-                yourLocation: '現在地',
-                detectingLocation: '位置情報を検出中...',
-                locationDetected: '位置情報が検出されました',
-                locationDenied: '位置情報アクセスが拒否されました',
-                locationError: '位置情報が見つかりません',
-                availableTools: '利用可能なツール',
-                btn1: '退職通知書',
-                btn2: '履歴書ビルダー',
-                btn3: 'ポートフォリオジェネレーター',
-                btn4: '標準退職届',
-                btn5: '求職応募書類',
-                footer: '最大の生産性を追求した最新技術で作成',
-                langCode: 'JPN'
+                hero_kanji: "刀刃文書",
+                hero_subtitle: "ブレードドキュメント",
+                hero_tagline: "戦士のための鋭い書類ツール",
+                card1_title: "退職通知書",
+                card1_desc: "正式な通知を含むフォーマルな退職届テンプレート。会社でのプロフェッショナルな退職手続きに最適です。",
+                card1_btn: "ドキュメントを開く",
+                card2_title: "退職テンプレート V2",
+                card2_desc: "よりモダンでエレガントな退職テンプレート第2版。新しいデザイン、同じ強さ。",
+                card2_btn: "ドキュメントを開く",
+                card3_title: "マルチ書類ツール",
+                card3_desc: "3つのツールが1つに：CVビルダー、ポートフォリオジェネレーター、標準退職届。必要なものを選んでください。",
+                card3_link1: "CVビルダー",
+                card3_link2: "ポートフォリオジェネレーター",
+                card3_link3: "標準退職届",
+                card4_title: "求職応募書類",
+                card4_desc: "プロフェッショナルで説得力のある求職応募書類を作成。夢の仕事への応募にすぐ使えます。",
+                card4_btn: "ドキュメントを開く",
+                footer_text: "精密に鍛えられた — 刀刃文書",
+                toast_lang: "言語が日本語に変更されました"
             },
-            de: {
-                heroTitle: 'Die Abkürzung zu Ihrer Karriere',
-                heroSubtitle: 'Professionelle Dokumententools für Ihre Karrierebedürfnisse',
-                worldClock: 'Weltzeit',
-                yourLocation: 'Ihr Standort',
-                detectingLocation: 'Standort wird ermittelt...',
-                locationDetected: 'Standort erkannt',
-                locationDenied: 'Standortzugriff verweigert',
-                locationError: 'Standort kann nicht gefunden werden',
-                availableTools: 'Verfügbare Tools',
-                btn1: 'Kündigungsschreiben',
-                btn2: 'Lebenslauf-Generator',
-                btn3: 'Portfolio-Generator',
-                btn4: 'Standard-Kündigung',
-                btn5: 'Bewerbungsschreiben',
-                footer: 'Mit moderner Technologie für maximale Produktivität erstellt',
-                langCode: 'DEU'
+            id: {
+                hero_kanji: "刀刃文書",
+                hero_subtitle: "BLADE DOCS",
+                hero_tagline: "Dokumen Kerja Bermata Tajam",
+                card1_title: "Surat Resign Notice",
+                card1_desc: "Template surat pengunduran diri formal dengan pemberitahuan resmi. Cocok untuk proses resign profesional di perusahaan.",
+                card1_btn: "Buka Dokumen",
+                card2_title: "Template Resign V2",
+                card2_desc: "Desain template pengunduran diri versi kedua yang lebih modern dan elegan. Tampilan baru, kesan sama kuatnya.",
+                card2_btn: "Buka Dokumen",
+                card3_title: "Alat Multi Dokumen",
+                card3_desc: "Tiga alat dalam satu: Builder CV, Portfolio Generator, dan Surat Resign Biasa. Pilih sesuai kebutuhanmu.",
+                card3_link1: "Builder CV",
+                card3_link2: "Portfolio Generator",
+                card3_link3: "Surat Resign Biasa",
+                card4_title: "Surat Lamaran Kerja",
+                card4_desc: "Buat surat lamaran kerja yang profesional dan meyakinkan. Langsung bisa dipakai untuk melamar pekerjaan impianmu.",
+                card4_btn: "Buka Dokumen",
+                footer_text: "Ditempa dengan presisi — Blade Docs",
+                toast_lang: "Bahasa diubah ke Bahasa Indonesia"
             }
         };
-        
+
         let currentLang = 'id';
-        
-        // Language selector
-        const langBtn = document.getElementById('langBtn');
-        const langDropdown = document.getElementById('langDropdown');
-        const currentLangDisplay = document.getElementById('currentLang');
-        const langOptions = document.querySelectorAll('.lang-option');
-        
-        langBtn.addEventListener('click', () => {
-            const isOpen = langDropdown.classList.contains('active');
-            langDropdown.classList.toggle('active');
-            langBtn.setAttribute('aria-expanded', !isOpen);
-        });
-        
-        langOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const lang = option.getAttribute('data-lang');
-                setLanguage(lang);
-                langDropdown.classList.remove('active');
-                langBtn.setAttribute('aria-expanded', 'false');
-            });
-            
-            option.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    option.click();
-                }
-            });
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!langBtn.contains(e.target) && !langDropdown.contains(e.target)) {
-                langDropdown.classList.remove('active');
-                langBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-        
-        function setLanguage(lang) {
+
+        // =============================================
+        // SWITCH LANGUAGE
+        // =============================================
+        function switchLang(lang) {
             currentLang = lang;
+
+            // Perbarui tombol aktif
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Terapkan terjemahan ke semua elemen
             const t = translations[lang];
-            
-            // Update all translatable elements
-            document.querySelectorAll('[data-translate]').forEach(el => {
-                const key = el.getAttribute('data-translate');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
                 if (t[key]) {
-                    el.textContent = t[key];
+                    // Pertahankan ikon di dalam tombol
+                    const icon = el.querySelector('i');
+                    if (icon) {
+                        el.textContent = t[key] + ' ';
+                        el.appendChild(icon);
+                    } else {
+                        el.textContent = t[key];
+                    }
                 }
             });
-            
-            // Update current language display
-            currentLangDisplay.textContent = t.langCode;
-            
-            // Update active state
-            langOptions.forEach(opt => {
-                opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+
+            // Tampilkan toast notifikasi
+            showToast(t.toast_lang);
+        }
+
+        // =============================================
+        // TOAST NOTIFICATION
+        // =============================================
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-language"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 3000);
+        }
+
+        // =============================================
+        // CARD MOUSE TRACKING (glow effect)
+        // =============================================
+        function trackMouse(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mx', x + '%');
+            card.style.setProperty('--my', y + '%');
+        }
+
+        // =============================================
+        // PARTICLE SYSTEM (Demon Slayer inspired)
+        // =============================================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Kelas partikel dengan efek api/teal seperti breathing style
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 50;
+                this.size = Math.random() * 3 + 1;
+                this.speedY = -(Math.random() * 1.2 + 0.3);
+                this.speedX = (Math.random() - 0.5) * 0.6;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.fadeSpeed = Math.random() * 0.003 + 0.001;
+                this.life = 1;
+
+                // Warna: merah api, emas, atau teal (seperti breathing styles)
+                const colorChoice = Math.random();
+                if (colorChoice < 0.45) {
+                    // Api merah - Hinokami Kagura
+                    this.r = 200 + Math.floor(Math.random() * 55);
+                    this.g = 40 + Math.floor(Math.random() * 40);
+                    this.b = 20 + Math.floor(Math.random() * 30);
+                } else if (colorChoice < 0.75) {
+                    // Emas - Sun Breathing
+                    this.r = 230 + Math.floor(Math.random() * 25);
+                    this.g = 180 + Math.floor(Math.random() * 40);
+                    this.b = 20 + Math.floor(Math.random() * 30);
+                } else {
+                    // Teal - Water Breathing
+                    this.r = 20 + Math.floor(Math.random() * 30);
+                    this.g = 160 + Math.floor(Math.random() * 40);
+                    this.b = 140 + Math.floor(Math.random() * 30);
+                }
+            }
+
+            update() {
+                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.3;
+                this.y += this.speedY;
+                this.life -= this.fadeSpeed;
+
+                if (this.life <= 0 || this.y < -20) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life * this.opacity;
+                ctx.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
+                ctx.shadowColor = `rgba(${this.r},${this.g},${this.b},0.6)`;
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, Math.max(0.5, this.size * this.life), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Inisialisasi partikel
+        const PARTICLE_COUNT = Math.min(80, Math.floor(window.innerWidth / 15));
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const p = new Particle();
+            p.y = Math.random() * canvas.height; // Sebar awal
+            particles.push(p);
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
             });
+            animFrameId = requestAnimationFrame(animateParticles);
         }
-        
-        // Clock functions
-        function updateClocks() {
-            const now = new Date();
-            
-            // Jakarta (UTC+7)
-            const jakartaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-            document.getElementById('clockJakarta').textContent = jakartaTime.toLocaleTimeString('en-GB');
-            
-            // Tokyo (UTC+9)
-            const tokyoTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-            document.getElementById('clockTokyo').textContent = tokyoTime.toLocaleTimeString('en-GB');
-            
-            // Berlin (UTC+1 or UTC+2 during DST)
-            const berlinTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
-            document.getElementById('clockBerlin').textContent = berlinTime.toLocaleTimeString('en-GB');
+
+        // Cek preferensi reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!prefersReducedMotion) {
+            animateParticles();
         }
-        
-        // Update clocks every second
-        setInterval(updateClocks, 1000);
-        updateClocks();
-        
-        // Geolocation
-        function getLocation() {
-            const locationText = document.getElementById('locationText');
-            const locationCoords = document.getElementById('locationCoords');
-            
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude.toFixed(4);
-                        const lon = position.coords.longitude.toFixed(4);
-                        
-                        // Reverse geocoding using free API
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';
-                                const country = data.address?.country || '';
-                                locationText.textContent = city ? `${city}, ${country}` : translations[currentLang].locationDetected;
-                            })
-                            .catch(() => {
-                                locationText.textContent = translations[currentLang].locationDetected;
-                            });
-                        
-                        locationCoords.textContent = `${lat}° N, ${lon}° E`;
-                    },
-                    (error) => {
-                        if (error.code === error.PERMISSION_DENIED) {
-                            locationText.textContent = translations[currentLang].locationDenied;
-                        } else {
-                            locationText.textContent = translations[currentLang].locationError;
-                        }
-                        locationCoords.textContent = '--';
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 300000
-                    }
-                );
+
+        // =============================================
+        // INTERSECTION OBSERVER (scroll reveal)
+        // =============================================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // =============================================
+        // KONAMI CODE EASTER EGG
+        // =============================================
+        const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    konamiIndex = 0;
+                    // Aktifkan mode Nichirin - semua partikel jadi emas terang
+                    particles.forEach(p => {
+                        p.r = 255;
+                        p.g = 200 + Math.floor(Math.random() * 55);
+                        p.b = 0;
+                        p.size = Math.random() * 5 + 2;
+                        p.opacity = 0.9;
+                    });
+                    showToast('Nichirin Blade Mode Activated!');
+                    setTimeout(() => {
+                        particles.forEach(p => p.reset());
+                    }, 5000);
+                }
             } else {
-                locationText.textContent = translations[currentLang].locationError;
-                locationCoords.textContent = '--';
+                konamiIndex = 0;
             }
-        }
-        
-        // Initialize geolocation
-        getLocation();
-        
-        // Update location text when language changes
-        const originalSetLanguage = setLanguage;
-        setLanguage = function(lang) {
-            originalSetLanguage(lang);
-            // Re-get location to update text
-            const locationText = document.getElementById('locationText');
-            if (locationText.textContent === 'Mendeteksi lokasi...' || 
-                locationText.textContent === 'Detecting location...' ||
-                locationText.textContent === '位置情報を検出中...' ||
-                locationText.textContent === 'Standort wird ermittelt...') {
-                locationText.textContent = translations[lang].detectingLocation;
-            }
-        };
+        });
+
+        // Inisialisasi bahasa default
+        switchLang('id');
     </script>
 </body>
 </html>
